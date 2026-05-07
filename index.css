@@ -1,0 +1,60 @@
+
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { User, Bot, Copy, Check } from 'lucide-react';
+import { Message } from '../types/chat';
+import { cn } from '../utils/cn';
+import { useState } from 'react';
+
+interface MessageItemProps {
+  message: Message;
+}
+
+export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
+  const [copied, setCopied] = useState(false);
+  const isAssistant = message.role === 'assistant';
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className={cn(
+      "w-full py-8 group",
+      isAssistant ? "bg-white/[0.02]" : "bg-transparent"
+    )}>
+      <div className="max-w-3xl mx-auto px-4 flex gap-6">
+        <div className={cn(
+          "w-8 h-8 rounded-sm flex items-center justify-center shrink-0 mt-1",
+          isAssistant ? "bg-indigo-600 text-white" : "bg-emerald-600 text-white"
+        )}>
+          {isAssistant ? <Bot size={20} /> : <User size={20} />}
+        </div>
+        
+        <div className="flex-1 space-y-2 overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+              {isAssistant ? 'Nexus AI' : 'You'}
+            </span>
+            <button 
+              onClick={handleCopy}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-white text-gray-500"
+              title="Copy message"
+            >
+              {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+            </button>
+          </div>
+          
+          <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {message.content}
+            </ReactMarkdown>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
